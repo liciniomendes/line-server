@@ -15,7 +15,8 @@
       "applicationUrl": "https://localhost:7155;http://localhost:5155",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "commandLineArgs": "../../text-1000-mb.txt"
     },
     "IIS Express": {
       "commandName": "IISExpress",
