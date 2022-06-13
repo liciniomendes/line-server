@@ -1,6 +1,4 @@
-﻿using Presentation.Api.Models;
-
-namespace Presentation.Api.Tests.Services.FileServiceTests;
+﻿namespace Presentation.Api.Tests.Services.FileServiceTests;
 
 public class GetTextTests
 {

@@ -4,6 +4,7 @@ global using FluentAssertions;
 
 global using Microsoft.Extensions.Logging;
 
+global using Presentation.Api.Models;
 global using Presentation.Api.Services.Abstractions;
 global using Presentation.Api.Services.Implementations;
 

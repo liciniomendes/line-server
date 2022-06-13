@@ -1,5 +1,9 @@
 namespace Presentation.Api.Services.Implementations;
 
+/// <summary>
+/// Implements a service that controls access to a file
+/// using a <see cref="FileInfo"/> component
+/// </summary>
 public class FileService : IFileService
 {
     private readonly IFileInfo _file;
@@ -11,6 +15,7 @@ public class FileService : IFileService
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public bool IsValid()
     {
         _logger.LogDebug("Validating file [{fullPath}]", _file.FullName);
@@ -24,8 +29,10 @@ public class FileService : IFileService
         return false;
     }
 
+    /// <inheritdoc />
     public Stream OpenRead() => _file.OpenRead();
     
+    /// <inheritdoc />
     public string GetText(Position position)
     {
         using var stream = _file.OpenRead();

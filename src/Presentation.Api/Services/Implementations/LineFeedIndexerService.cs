@@ -1,12 +1,17 @@
 namespace Presentation.Api.Services.Implementations;
 
-public class IndexerService : IIndexerService
+/// <summary>
+/// Implements a indexer service that indexes a file by lines. 
+/// A line will be created for each line feed <c>\n</c>
+/// </summary>
+public class LineFeedIndexerService : IIndexerService
 {
-    private readonly ILogger<IndexerService> _logger;
+    private readonly ILogger<LineFeedIndexerService> _logger;
     private Memory<long> _index = Memory<long>.Empty;
 
-    public IndexerService(ILogger<IndexerService> logger) => _logger = logger;
+    public LineFeedIndexerService(ILogger<LineFeedIndexerService> logger) => _logger = logger;
 
+    /// <inheritdoc />
     public Position GetLinePosition(int lineNumber)
     {
         var index = _index.Span;
@@ -17,8 +22,10 @@ public class IndexerService : IIndexerService
         return new Position(start, end);
     }
 
+    /// <inheritdoc />
     public int Size => _index.Length;
     
+    /// <inheritdoc />
     public bool Build(IFileService fileService)
     {
         var numberOfLines = 0L;
@@ -32,12 +39,21 @@ public class IndexerService : IIndexerService
         for (var i = 0L; i < stream.Length; i++)
         {
             var value = stream.ReadByte();
-            if (value is not '\n') continue;
+            if (value is not '\n')
+            {
+                continue;
+            }
             
             index.AddLast(i);
             numberOfLines += 1;
 
-            if (numberOfLines <= int.MaxValue) continue;
+            // an array max size is int.MaxValue, we are accepting that 
+            // this solution only works while the number of lines is lower
+            // than that
+            if (numberOfLines <= int.MaxValue)
+            {
+                continue;
+            }
             
             _logger.LogCritical(
                 "File contains at least [{totalLines}] lines, max supported is [{maxLines}]",
@@ -52,7 +68,7 @@ public class IndexerService : IIndexerService
             "File contains [{lines}] lines, took {elapsed} and is using {MemorySize}",
             index.Count,
             stopwatch.Elapsed,
-            ConvertToReadableSize(System.Diagnostics.Process.GetCurrentProcess().WorkingSet64));
+            ConvertToReadableSize(Process.GetCurrentProcess().WorkingSet64));
 
         _index = new Memory<long>(index.ToArray());
 
