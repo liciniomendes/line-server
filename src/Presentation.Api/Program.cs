@@ -2,7 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // registers the services in the DI
 builder.Services
-    .AddSingleton<IIndexerService, LineFeedIndexerService>()
+    .AddSingleton<IIndexerService, NewlineIndexerService>()
     .AddSingleton<IFileService, FileService>()
     .AddSingleton<IFileSystem, FileSystem>()
     .AddSingleton<IFileInfo>(provider =>
@@ -16,14 +16,14 @@ var app = builder.Build();
 
 // Defines the endpoints
 app.MapGet("/", () => args[0]);
-app.MapGet("/lines/{lineNumber:int}", (int lineNumber, IIndexerService indexer, IFileService fileService) =>
+app.MapGet("/lines/{lineNumber:long}", (long lineNumber, IIndexerService indexer, IFileService fileService) =>
 {
     if (lineNumber < 0 || lineNumber > indexer.Size)
     {
         return Results.StatusCode(413);
     }
 
-    var linePosition = indexer.GetLinePosition(lineNumber);
+    var linePosition = indexer.GetLinePosition((int)lineNumber);
     return Results.Ok(fileService.GetText(linePosition));
 });
 

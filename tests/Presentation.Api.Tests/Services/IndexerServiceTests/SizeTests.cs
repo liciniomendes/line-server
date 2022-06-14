@@ -5,8 +5,8 @@ public class SizeTests
     [Fact]
     public void WhenBuildIsNotCalled_ShouldReturnZeroTest()
     {
-        var loggerDummy = A.Dummy<ILogger<LineFeedIndexerService>>();
-        var service = new LineFeedIndexerService(loggerDummy);
+        var loggerDummy = A.Dummy<ILogger<NewlineIndexerService>>();
+        var service = new NewlineIndexerService(loggerDummy);
 
         var actual = service.Size;
 
@@ -16,10 +16,10 @@ public class SizeTests
     [Fact]
     public void WhenFileIsEmpty_ShouldReturnZeroTest()
     {
-        var loggerDummy = A.Dummy<ILogger<LineFeedIndexerService>>();
+        var loggerDummy = A.Dummy<ILogger<NewlineIndexerService>>();
         var fileServiceMock = A.Fake<IFileService>(m => m.Strict());
         A.CallTo(() => fileServiceMock.OpenRead()).Returns(new MemoryStream());
-        var service = new LineFeedIndexerService(loggerDummy);
+        var service = new NewlineIndexerService(loggerDummy);
         service.Build(fileServiceMock);
 
         var actual = service.Size;
@@ -29,13 +29,13 @@ public class SizeTests
     }
     
     [Fact]
-    public void WhenFileDoesNotContainLineFeed_ShouldReturnZeroTest()
+    public void WhenFileDoesNotContainNewline_ShouldReturnZeroTest()
     {
-        var loggerDummy = A.Dummy<ILogger<LineFeedIndexerService>>();
+        var loggerDummy = A.Dummy<ILogger<NewlineIndexerService>>();
         var fileContent = Encoding.ASCII.GetBytes("May the force be with you!");
         var fileServiceMock = A.Fake<IFileService>(m => m.Strict());
         A.CallTo(() => fileServiceMock.OpenRead()).Returns(new MemoryStream(fileContent));
-        var service = new LineFeedIndexerService(loggerDummy);
+        var service = new NewlineIndexerService(loggerDummy);
         service.Build(fileServiceMock);
 
         var actual = service.Size;
@@ -45,13 +45,13 @@ public class SizeTests
     }
     
     [Fact]
-    public void WhenFileDoesContainLineFeed_ShouldReturnOneTest()
+    public void WhenFileDoesContainNewline_ShouldReturnOneTest()
     {
-        var loggerDummy = A.Dummy<ILogger<LineFeedIndexerService>>();
+        var loggerDummy = A.Dummy<ILogger<NewlineIndexerService>>();
         var fileContent = Encoding.ASCII.GetBytes("May the force be with you!\n");
         var fileServiceMock = A.Fake<IFileService>(m => m.Strict());
         A.CallTo(() => fileServiceMock.OpenRead()).Returns(new MemoryStream(fileContent));
-        var service = new LineFeedIndexerService(loggerDummy);
+        var service = new NewlineIndexerService(loggerDummy);
         service.Build(fileServiceMock);
 
         var actual = service.Size;
@@ -61,13 +61,13 @@ public class SizeTests
     }
     
     [Fact]
-    public void WhenFileDoesContainConsecutiveLineFeeds_ShouldCountAsALineTest()
+    public void WhenFileDoesContainConsecutiveNewlines_ShouldCountAsALineTest()
     {
-        var loggerDummy = A.Dummy<ILogger<LineFeedIndexerService>>();
+        var loggerDummy = A.Dummy<ILogger<NewlineIndexerService>>();
         var fileContent = Encoding.ASCII.GetBytes("\n\n\n");
         var fileServiceMock = A.Fake<IFileService>(m => m.Strict());
         A.CallTo(() => fileServiceMock.OpenRead()).Returns(new MemoryStream(fileContent));
-        var service = new LineFeedIndexerService(loggerDummy);
+        var service = new NewlineIndexerService(loggerDummy);
         service.Build(fileServiceMock);
 
         var actual = service.Size;

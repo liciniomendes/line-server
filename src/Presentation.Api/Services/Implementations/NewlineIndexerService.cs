@@ -2,14 +2,14 @@ namespace Presentation.Api.Services.Implementations;
 
 /// <summary>
 /// Implements a indexer service that indexes a file by lines. 
-/// A line will be created for each line feed <c>\n</c>
+/// A line will be created for each newline <c>\n</c>
 /// </summary>
-public class LineFeedIndexerService : IIndexerService
+public class NewlineIndexerService : IIndexerService
 {
-    private readonly ILogger<LineFeedIndexerService> _logger;
+    private readonly ILogger<NewlineIndexerService> _logger;
     private Memory<long> _index = Memory<long>.Empty;
 
-    public LineFeedIndexerService(ILogger<LineFeedIndexerService> logger) => _logger = logger;
+    public NewlineIndexerService(ILogger<NewlineIndexerService> logger) => _logger = logger;
 
     /// <inheritdoc />
     public Position GetLinePosition(int lineNumber)
