@@ -36,17 +36,25 @@ public class NewlineIndexerService : IIndexerService
         _logger.LogDebug("Stream size is [{size}]", ConvertToReadableSize(stream.Length));
         
         var index = new LinkedList<long>();
-        for (var i = 0L; i < stream.Length; i++)
+        var reader = new StreamReader(stream);
+        var buffer = new char[4096].AsSpan();
+        var counter = 0;
+        while (reader.EndOfStream is false)
         {
-            var value = stream.ReadByte();
-            if (value is not '\n')
+            var read = reader.Read(buffer);
+            for (var i = 0; i < read; i++)
             {
-                continue;
-            }
-            
-            index.AddLast(i);
-            numberOfLines += 1;
+                if (buffer[i] is not '\n')
+                {
+                    continue;
+                }
 
+                index.AddLast(counter + i);
+                numberOfLines += 1;
+            }
+
+            counter += buffer.Length;
+            
             // an array max size is int.MaxValue, we are accepting that 
             // this solution only works while the number of lines is lower
             // than that
@@ -62,6 +70,33 @@ public class NewlineIndexerService : IIndexerService
                 
             return false;
         }
+        
+        // for (var i = 0L; i < stream.Length; i++)
+        // {
+        //     var value = stream.ReadByte();
+        //     if (value is not '\n')
+        //     {
+        //         continue;
+        //     }
+        //     
+        //     index.AddLast(i);
+        //     numberOfLines += 1;
+        //
+        //     // an array max size is int.MaxValue, we are accepting that 
+        //     // this solution only works while the number of lines is lower
+        //     // than that
+        //     if (numberOfLines <= int.MaxValue)
+        //     {
+        //         continue;
+        //     }
+        //     
+        //     _logger.LogCritical(
+        //         "File contains at least [{totalLines}] lines, max supported is [{maxLines}]",
+        //         numberOfLines, 
+        //         int.MaxValue);
+        //         
+        //     return false;
+        // }
         
         stopwatch.Stop();
         _logger.LogDebug(
