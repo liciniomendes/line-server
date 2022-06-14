@@ -7,7 +7,7 @@ namespace Presentation.Api.Services.Implementations;
 public class NewlineIndexerService : IIndexerService
 {
     private readonly ILogger<NewlineIndexerService> _logger;
-    private Memory<long> _index = Memory<long>.Empty;
+    private Memory<int> _index = Memory<int>.Empty;
 
     public NewlineIndexerService(ILogger<NewlineIndexerService> logger) => _logger = logger;
 
@@ -35,10 +35,10 @@ public class NewlineIndexerService : IIndexerService
         using var stream = fileService.OpenRead();
         _logger.LogDebug("Stream size is [{size}]", ConvertToReadableSize(stream.Length));
         
-        var index = new LinkedList<long>();
+        var index = new LinkedList<int>();
         var reader = new StreamReader(stream);
         var buffer = new char[4096].AsSpan();
-        var counter = 0;
+        var streamProgress = 0;
         while (reader.EndOfStream is false)
         {
             var read = reader.Read(buffer);
@@ -49,11 +49,11 @@ public class NewlineIndexerService : IIndexerService
                     continue;
                 }
 
-                index.AddLast(counter + i);
+                index.AddLast(streamProgress + i);
                 numberOfLines += 1;
             }
 
-            counter += buffer.Length;
+            streamProgress += buffer.Length;
             
             // an array max size is int.MaxValue, we are accepting that 
             // this solution only works while the number of lines is lower
@@ -71,33 +71,6 @@ public class NewlineIndexerService : IIndexerService
             return false;
         }
         
-        // for (var i = 0L; i < stream.Length; i++)
-        // {
-        //     var value = stream.ReadByte();
-        //     if (value is not '\n')
-        //     {
-        //         continue;
-        //     }
-        //     
-        //     index.AddLast(i);
-        //     numberOfLines += 1;
-        //
-        //     // an array max size is int.MaxValue, we are accepting that 
-        //     // this solution only works while the number of lines is lower
-        //     // than that
-        //     if (numberOfLines <= int.MaxValue)
-        //     {
-        //         continue;
-        //     }
-        //     
-        //     _logger.LogCritical(
-        //         "File contains at least [{totalLines}] lines, max supported is [{maxLines}]",
-        //         numberOfLines, 
-        //         int.MaxValue);
-        //         
-        //     return false;
-        // }
-        
         stopwatch.Stop();
         _logger.LogDebug(
             "File contains [{lines}] lines, took {elapsed} and is using {MemorySize}",
@@ -105,7 +78,7 @@ public class NewlineIndexerService : IIndexerService
             stopwatch.Elapsed,
             ConvertToReadableSize(Process.GetCurrentProcess().WorkingSet64));
 
-        _index = new Memory<long>(index.ToArray());
+        _index = new Memory<int>(index.ToArray());
 
         return true;
     }

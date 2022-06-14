@@ -102,11 +102,76 @@ The performance tests were run using release build on my dev boxes:
 This will be the operation that is mostly affected by the file size since we need
 to traverse the whole file. 
 
-| File Size |     Lines | Memory |  Windows 11 |  MacBook |
-|----------:|----------:|-------:|------------:|---------:|
-|     10 MB |     10350 |  38 MB |      101 ms | 0:05:810 |
-|    100 MB |    102762 |  43 MB |     1034 ms | 0:57:546 |
-|      1 GB |   1024560 |  87 MB |     8367 ms |       -- |
-|     10 GB |  10262510 | 532 MB | 0:01:17.588 |       -- |
+| File Size |     Lines | Memory | Windows 11 |   MacBook |
+|----------:|----------:|-------:|-----------:|----------:|
+|     10 MB |     10350 |  38 MB |      13 ms |     18 ms |
+|    100 MB |    102762 |  43 MB |     196 ms |    203 ms |
+|      1 GB |   1024560 |  88 MB |   1 600 ms |  1 910 ms |
+|     10 GB |  10262510 | 533 MB |  15 362 ms | 20 286 ms |
 
-#### 
+#### Requests
+Request tests were done using [ali](https://github.com/nakabonne/ali) on both OS.
+Benchmark was done over a minute span. Both OS configurations are the default related
+to number of file handles that they can handle.
+
+Besides the common bottlenecks of services this has another one that are the number
+of file handlers the OS allow to use concurrently. 
+
+    $ ali --duration=1m --rate={concurrentRequests} https://localhost:5001/lines/{lineNumber}
+
+##### Windows 11
+
+| File Size | lineNumber | concurrentRequests |     Mean |      Min |   Max | Errors |
+|----------:|-----------:|-------------------:|---------:|---------:|------:|-------:|
+|     10 MB |       5000 |                100 | 0.727 ms | 0.937 ms | 25 ms |      0 |
+|     10 MB |       5000 |               1000 | 1.568 ms | 1.000 ms | 29 ms |      0 |
+|      1 GB |     500000 |                100 | 0.683 ms | 0.508 ms | 36 ms |      0 |
+|      1 GB |     500000 |               1000 | 1.651 ms | 0.509 ms | 31 ms |      0 |
+|     10 GB |    5000000 |                100 | 0.688 ms | 0.000 ms | 19 ms |      0 |
+|     10 GB |    5000000 |               1000 | 1.508 ms | 0.527 ms | 23 ms |      0 |
+
+##### MacBook Pro
+
+| File Size | lineNumber | concurrentRequests |     Mean |      Min |    Max | Errors |
+|----------:|-----------:|-------------------:|---------:|---------:|-------:|-------:|
+|     10 MB |       5000 |                100 | 1.023 ms | 0.198 ms | 154 ms |      0 |
+|     10 MB |       5000 |               1000 | 7.884 ms | 0.037 ms |    1 s |   1738 | 
+|      1 GB |     500000 |                100 | 1.373 ms | 0.218 ms | 240 ms |      0 |
+|      1 GB |     500000 |               1000 | 7.936 ms | 0.037 ms |    2 s |   1758 |
+|     10 GB |    5000000 |                100 | 1.585 ms | 0.267 ms | 279 ms |      0 |
+|     10 GB |    5000000 |               1000 | 7.925 ms | 0.038 ms |   2 ms |   1755 |
+
+### Research
+Most of the documents used were from [Microsoft technical documentation](https://docs.microsoft.com/en-us/).
+[Awesome http benchmark](https://github.com/denji/awesome-http-benchmark) to find a 
+simple tool to do some benchmarks in both OS.
+
+### Dependencies
+ASP.NET was the choice since is a framework that I like and wanted to test then
+new minimal apis.
+
+[System.IO.Abstractions](https://github.com/TestableIO/System.IO.Abstractions) were used
+to simplify unit-testing with the file system. .NET doesn't have built in abstractions
+to the file system. Used this because it is a mature implementation.
+
+To simplify the test creation two libraries were used, [FakeItEasy](https://github.com/FakeItEasy/FakeItEasy)
+and [FluentAssertions](https://github.com/fluentassertions/fluentassertions).
+The reasoning is the same for both, simplify the test readability and
+implementation.
+
+### Time spent
+Around 16h were used to build, test and write the documentation.
+
+If had unlimited time would:
+1. Implement authentication and authorization
+2. Increment the test coverage
+3. Monitoring and traceability
+4. Reuse of file handle to eliminate the OS limitation
+5. Partition the index to remove the cap on max number of lines
+6. Implement a CLI to build the index outside of the api
+
+### Things to better
+To early to find something that could do better :D
+From the current implementation, without more information the 
+only thing should make better would be `NewlineIndexerService.Build`
+method that is a bit bigger than I would like.
