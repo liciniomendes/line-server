@@ -1,6 +1,5 @@
 # Line Server
 Implementation of a REST API that serves lines from an ASCII file.
-A line is delimited with a newline (`\n`).
 
 ## Prerequisites
 You need [NET6 SDK](https://dotnet.microsoft.com/en-us/download)
@@ -111,10 +110,10 @@ to traverse the whole file.
 
 #### Requests
 Request tests were done using [ali](https://github.com/nakabonne/ali) on both OS.
-Benchmark was done over a minute span. Both OS configurations are the default related
-to number of file handles that they can handle.
+Benchmark was done over a minute span. Both OS configurations have the default configurations
+related to the maximum number of handles accepted..
 
-Besides the common bottlenecks of services this has another one that are the number
+Besides the common bottlenecks of services this has another one that is the number
 of file handlers the OS allow to use concurrently. 
 
     $ ali --duration=1m --rate={concurrentRequests} https://localhost:5001/lines/{lineNumber}
@@ -147,11 +146,11 @@ Most of the documents used were from [Microsoft technical documentation](https:/
 simple tool to do some benchmarks in both OS.
 
 ### Dependencies
-ASP.NET was the choice since is a framework that I like and wanted to test then
+ASP.NET was the choice since is a framework that I like and wanted to test the
 new minimal apis.
 
 [System.IO.Abstractions](https://github.com/TestableIO/System.IO.Abstractions) were used
-to simplify unit-testing with the file system. .NET doesn't have built in abstractions
+to simplify unit-testing with the file system. .NET doesn't have built-in abstractions
 to the file system. Used this because it is a mature implementation.
 
 To simplify the test creation two libraries were used, [FakeItEasy](https://github.com/FakeItEasy/FakeItEasy)
@@ -163,12 +162,13 @@ implementation.
 Around 16h were used to build, test and write the documentation.
 
 If had unlimited time would:
-1. Implement authentication and authorization
-2. Increment the test coverage
-3. Monitoring and traceability
-4. Reuse of file handle to eliminate the OS limitation
-5. Partition the index to remove the cap on max number of lines
-6. Implement a CLI to build the index outside of the api
+1. Release workflow
+2. Implement authentication and authorization
+3. Increment the test coverage
+4. Monitoring and traceability
+5. Reuse of file handle to eliminate the OS limitation
+6. Index partition to eliminate the cap on max number of lines
+7. Implement a CLI to build the index outside of the api
 
 ### Things to better
 To early to find something that could do better :D
